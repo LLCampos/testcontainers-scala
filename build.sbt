@@ -56,6 +56,7 @@ lazy val root = (project in file("."))
   .aggregate(
     core,
     munit,
+    specs2,
     scalatest,
     scalatestSelenium,
     jdbc,
@@ -219,6 +220,18 @@ lazy val munit = (project in file("test-framework/munit"))
   .settings(
     name := "testcontainers-scala-munit",
     libraryDependencies ++= Dependencies.munit.value
+  )
+
+lazy val specs2 = (project in file("test-framework/specs2"))
+  .dependsOn(core % "compile->compile;test->test;provided->provided")
+  .settings(commonSettings: _*)
+  .settings(testFrameworks += new TestFramework(
+    "org.specs2.runner.Specs2Framework",
+    "org.specs2.runner.SpecsFramework"
+  ))
+  .settings(
+    name := "testcontainers-scala-specs2",
+    libraryDependencies ++= Dependencies.specs2.value
   )
 
 lazy val scalatestSelenium = (project in file("test-framework/scalatest-selenium"))
