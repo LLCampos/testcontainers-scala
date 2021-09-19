@@ -4,6 +4,7 @@ import com.dimafeng.testcontainers.Container
 import com.dimafeng.testcontainers.specs2.TestContainerForAllSpec.{EmptySpec, MultipleTestsSpec, TestSpec}
 import org.mockito.Mockito.{never, times, verify}
 import org.scalatestplus.mockito.MockitoSugar
+import org.specs2.main.{Arguments, Report}
 import org.specs2.matcher.MatchResult
 import org.specs2.mutable.Specification
 import specs2.run
@@ -15,7 +16,7 @@ class TestContainerForAllSpec extends Specification with MockitoSugar {
       val container = mock[SampleContainer]
 
       val spec = new TestSpec(true must beTrue, container)
-      run(spec)
+      runSpecSilently(spec)
 
       verify(container).start()
       verify(container).stop()
@@ -26,7 +27,7 @@ class TestContainerForAllSpec extends Specification with MockitoSugar {
       val container = mock[SampleContainer]
 
       val spec = new TestSpec(false must beTrue, container)
-      run(spec)
+      runSpecSilently(spec)
 
       verify(container).start()
       verify(container).stop()
@@ -37,7 +38,7 @@ class TestContainerForAllSpec extends Specification with MockitoSugar {
       val container = mock[SampleContainer]
 
       val spec = new MultipleTestsSpec(true must beTrue, container)
-      run(spec)
+      runSpecSilently(spec)
 
       verify(container, times(1)).start()
       verify(container, times(1)).stop()
@@ -48,7 +49,7 @@ class TestContainerForAllSpec extends Specification with MockitoSugar {
       val container = mock[SampleContainer]
 
       val spec = new MultipleTestsSpec(true must beTrue, container)
-      run(spec)
+      runSpecSilently(spec)
 
       verify(container, never()).start()
       ok
@@ -58,12 +59,15 @@ class TestContainerForAllSpec extends Specification with MockitoSugar {
       val container = mock[SampleContainer]
 
       val spec = new EmptySpec(container)
-      run(spec)
+      runSpecSilently(spec)
 
       verify(container, never()).start()
       ok
     }
   }
+
+  def runSpecSilently(spec: Specification): Unit =
+    run(spec)(arguments = Arguments(report = Report(_showOnly = Some(""))))
 }
 
 object TestContainerForAllSpec {
