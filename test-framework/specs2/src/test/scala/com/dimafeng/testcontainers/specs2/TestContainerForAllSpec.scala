@@ -1,8 +1,8 @@
 package com.dimafeng.testcontainers.specs2
 
 import com.dimafeng.testcontainers.Container
-import com.dimafeng.testcontainers.specs2.TestContainerForAllSpec.{MultipleTestsSpec, TestSpec}
-import org.mockito.Mockito.{times, verify}
+import com.dimafeng.testcontainers.specs2.TestContainerForAllSpec.{EmptySpec, MultipleTestsSpec, TestSpec}
+import org.mockito.Mockito.{never, times, verify}
 import org.scalatestplus.mockito.MockitoSugar
 import org.specs2.matcher.MatchResult
 import org.specs2.mutable.Specification
@@ -43,6 +43,26 @@ class TestContainerForAllSpec extends Specification with MockitoSugar {
       verify(container, times(1)).stop()
       ok
     }
+
+    "not start container if all tests are pending" in pending {
+      val container = mock[SampleContainer]
+
+      val spec = new MultipleTestsSpec(true must beTrue, container)
+      run(spec)
+
+      verify(container, never()).start()
+      ok
+    }
+
+    "not start container for empty suite" in pending {
+      val container = mock[SampleContainer]
+
+      val spec = new EmptySpec(container)
+      run(spec)
+
+      verify(container, never()).start()
+      ok
+    }
   }
 }
 
@@ -68,6 +88,18 @@ object TestContainerForAllSpec {
     "test 2" in {
       result
     }
+  }
+
+  protected class TestSpecWithPending(result: => MatchResult[Any], cont: Container) extends ContainerSpec {
+    override val container: Container = cont
+
+    "test" in pending {
+      result
+    }
+  }
+
+  protected class EmptySpec(cont: Container) extends ContainerSpec {
+    override val container: Container = cont
   }
 
 }
