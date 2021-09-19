@@ -16,7 +16,7 @@ class TestContainerForAllSpec extends Specification with MockitoSugar {
       val container = mock[SampleContainer]
 
       val spec = new TestSpec(true must beTrue, container)
-      runSpecSilently(spec)
+      runSilently(spec)
 
       verify(container).start()
       verify(container).stop()
@@ -27,7 +27,7 @@ class TestContainerForAllSpec extends Specification with MockitoSugar {
       val container = mock[SampleContainer]
 
       val spec = new TestSpec(false must beTrue, container)
-      runSpecSilently(spec)
+      runSilently(spec)
 
       verify(container).start()
       verify(container).stop()
@@ -38,7 +38,7 @@ class TestContainerForAllSpec extends Specification with MockitoSugar {
       val container = mock[SampleContainer]
 
       val spec = new MultipleTestsSpec(true must beTrue, container)
-      runSpecSilently(spec)
+      runSilently(spec)
 
       verify(container, times(1)).start()
       verify(container, times(1)).stop()
@@ -49,7 +49,7 @@ class TestContainerForAllSpec extends Specification with MockitoSugar {
       val container = mock[SampleContainer]
 
       val spec = spy(new MultipleTestsSpec(true must beTrue, container))
-      runSpecSilently(spec)
+      runSilently(spec)
 
       verify(spec).afterContainerStart()
       verify(spec).beforeContainerStop()
@@ -69,7 +69,7 @@ class TestContainerForAllSpec extends Specification with MockitoSugar {
           beforeContainersStopCalled = true
       }
 
-      runSpecSilently(spec)
+      runSilently(spec)
 
       verify(container).start()
       verify(container).stop()
@@ -80,7 +80,7 @@ class TestContainerForAllSpec extends Specification with MockitoSugar {
       val container = mock[SampleContainer]
 
       val spec = new MultipleTestsSpec(true must beTrue, container)
-      runSpecSilently(spec)
+      runSilently(spec)
 
       verify(container, never()).start()
       ok
@@ -90,14 +90,14 @@ class TestContainerForAllSpec extends Specification with MockitoSugar {
       val container = mock[SampleContainer]
 
       val spec = new EmptySpec(container)
-      runSpecSilently(spec)
+      runSilently(spec)
 
       verify(container, never()).start()
       ok
     }
   }
 
-  def runSpecSilently(spec: Specification): Unit =
+  def runSilently(spec: Specification): Unit =
     run(spec)(arguments = Arguments(report = Report(_showOnly = Some(""))))
 }
 
