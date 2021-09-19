@@ -2,7 +2,7 @@ package com.dimafeng.testcontainers.specs2
 
 import com.dimafeng.testcontainers.Container
 import com.dimafeng.testcontainers.specs2.TestContainerForAllSpec.{EmptySpec, MultipleTestsSpec, TestSpec}
-import org.mockito.Mockito.{never, times, verify}
+import org.mockito.Mockito.{never, spy, times, verify}
 import org.scalatestplus.mockito.MockitoSugar
 import org.specs2.main.{Arguments, Report}
 import org.specs2.matcher.MatchResult
@@ -42,6 +42,17 @@ class TestContainerForAllSpec extends Specification with MockitoSugar {
 
       verify(container, times(1)).start()
       verify(container, times(1)).stop()
+      ok
+    }
+
+    "call afterContainersStart() and beforeContainersStop()" in {
+      val container = mock[SampleContainer]
+
+      val spec = spy(new MultipleTestsSpec(true must beTrue, container))
+      runSpecSilently(spec)
+
+      verify(spec).afterContainerStart()
+      verify(spec).beforeContainerStop()
       ok
     }
 

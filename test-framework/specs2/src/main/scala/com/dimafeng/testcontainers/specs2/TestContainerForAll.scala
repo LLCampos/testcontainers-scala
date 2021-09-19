@@ -7,9 +7,14 @@ trait TestContainerForAll extends BeforeAfterAll { self =>
 
   override def beforeAll(): Unit = {
     container.start()
+    afterContainerStart()
   }
 
   override def afterAll(): Unit = {
+    beforeContainerStop()
     container.stop()
   }
+
+  def afterContainerStart(): Unit = {}
+  def beforeContainerStop(): Unit = {}
 }
