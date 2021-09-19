@@ -56,6 +56,26 @@ class TestContainerForAllSpec extends Specification with MockitoSugar {
       ok
     }
 
+    "call beforeContainersStop() and stop container if error thrown in afterContainersStart()" in {
+      val container = mock[SampleContainer]
+
+      @volatile var beforeContainersStopCalled = false
+
+      val spec = new MultipleTestsSpec(true must beTrue, container) {
+        override def afterContainerStart(): Unit =
+          throw new RuntimeException("something wrong in afterContainersStart()")
+
+        override def beforeContainerStop(): Unit =
+          beforeContainersStopCalled = true
+      }
+
+      runSpecSilently(spec)
+
+      verify(container).start()
+      verify(container).stop()
+      beforeContainersStopCalled must beTrue
+    }
+
     "not start container if all tests are pending" in pending {
       val container = mock[SampleContainer]
 
