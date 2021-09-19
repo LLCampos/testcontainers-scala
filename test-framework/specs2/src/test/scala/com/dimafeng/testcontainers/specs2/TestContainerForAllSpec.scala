@@ -1,6 +1,6 @@
 package com.dimafeng.testcontainers.specs2
 
-import com.dimafeng.testcontainers.Container
+import com.dimafeng.testcontainers.ContainerDef
 import com.dimafeng.testcontainers.specs2.TestContainerForAllSpec.{EmptySpec, MultipleTestsSpec, TestSpec}
 import org.mockito.Mockito.{never, spy, times, verify}
 import org.scalatestplus.mockito.MockitoSugar
@@ -13,9 +13,9 @@ class TestContainerForAllSpec extends Specification with MockitoSugar {
 
   "TestContainerForAll" should {
     "call all appropriate methods of the container" in {
-      val container = mock[SampleContainer]
+      val container = mock[SampleJavaContainer]
 
-      val spec = new TestSpec(true must beTrue, container)
+      val spec = new TestSpec(true must beTrue, SampleContainer.Def(container))
       runSilently(spec)
 
       verify(container).start()
@@ -24,9 +24,9 @@ class TestContainerForAllSpec extends Specification with MockitoSugar {
     }
 
     "call all appropriate methods of the container if assertion fails" in {
-      val container = mock[SampleContainer]
+      val container = mock[SampleJavaContainer]
 
-      val spec = new TestSpec(false must beTrue, container)
+      val spec = new TestSpec(false must beTrue, SampleContainer.Def(container))
       runSilently(spec)
 
       verify(container).start()
@@ -35,9 +35,9 @@ class TestContainerForAllSpec extends Specification with MockitoSugar {
     }
 
     "start and stop container only once" in {
-      val container = mock[SampleContainer]
+      val container = mock[SampleJavaContainer]
 
-      val spec = new MultipleTestsSpec(true must beTrue, container)
+      val spec = new MultipleTestsSpec(true must beTrue, SampleContainer.Def(container))
       runSilently(spec)
 
       verify(container, times(1)).start()
@@ -46,9 +46,9 @@ class TestContainerForAllSpec extends Specification with MockitoSugar {
     }
 
     "call afterContainersStart() and beforeContainersStop()" in {
-      val container = mock[SampleContainer]
+      val container = mock[SampleJavaContainer]
 
-      val spec = spy(new MultipleTestsSpec(true must beTrue, container))
+      val spec = spy(new MultipleTestsSpec(true must beTrue, SampleContainer.Def(container)))
       runSilently(spec)
 
       verify(spec).afterContainerStart()
@@ -57,11 +57,11 @@ class TestContainerForAllSpec extends Specification with MockitoSugar {
     }
 
     "call beforeContainersStop() and stop container if error thrown in afterContainersStart()" in {
-      val container = mock[SampleContainer]
+      val container = mock[SampleJavaContainer]
 
       @volatile var beforeContainersStopCalled = false
 
-      val spec = new MultipleTestsSpec(true must beTrue, container) {
+      val spec = new MultipleTestsSpec(true must beTrue, SampleContainer.Def(container)) {
         override def afterContainerStart(): Unit =
           throw new RuntimeException("something wrong in afterContainersStart()")
 
@@ -77,9 +77,9 @@ class TestContainerForAllSpec extends Specification with MockitoSugar {
     }
 
     "not start container if all tests are pending" in pending {
-      val container = mock[SampleContainer]
+      val container = mock[SampleJavaContainer]
 
-      val spec = new MultipleTestsSpec(true must beTrue, container)
+      val spec = new MultipleTestsSpec(true must beTrue, SampleContainer.Def(container))
       runSilently(spec)
 
       verify(container, never()).start()
@@ -87,9 +87,9 @@ class TestContainerForAllSpec extends Specification with MockitoSugar {
     }
 
     "not start container for empty suite" in pending {
-      val container = mock[SampleContainer]
+      val container = mock[SampleJavaContainer]
 
-      val spec = new EmptySpec(container)
+      val spec = new EmptySpec(SampleContainer.Def(container))
       runSilently(spec)
 
       verify(container, never()).start()
@@ -105,16 +105,16 @@ object TestContainerForAllSpec {
 
   trait ContainerSpec extends Specification with TestContainerForAll
 
-  protected class TestSpec(result: => MatchResult[Any], cont: Container) extends ContainerSpec {
-    override val container: Container = cont
+  protected class TestSpec(result: => MatchResult[Any], cont: ContainerDef) extends ContainerSpec {
+    override val containerDef: ContainerDef = cont
 
     "test" in {
       result
     }
   }
 
-  protected class MultipleTestsSpec(result: => MatchResult[Any], cont: Container) extends ContainerSpec {
-    override val container: Container = cont
+  protected class MultipleTestsSpec(result: => MatchResult[Any], cont: ContainerDef) extends ContainerSpec {
+    override val containerDef: ContainerDef = cont
 
     "test 1" in {
       result
@@ -125,16 +125,16 @@ object TestContainerForAllSpec {
     }
   }
 
-  protected class TestSpecWithPending(result: => MatchResult[Any], cont: Container) extends ContainerSpec {
-    override val container: Container = cont
+  protected class TestSpecWithPending(result: => MatchResult[Any], cont: ContainerDef) extends ContainerSpec {
+    override val containerDef: ContainerDef = cont
 
     "test" in pending {
       result
     }
   }
 
-  protected class EmptySpec(cont: Container) extends ContainerSpec {
-    override val container: Container = cont
+  protected class EmptySpec(cont: ContainerDef) extends ContainerSpec {
+    override val containerDef: ContainerDef = cont
   }
 
 }

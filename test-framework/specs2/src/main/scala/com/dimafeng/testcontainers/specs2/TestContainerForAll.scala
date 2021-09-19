@@ -1,18 +1,21 @@
 package com.dimafeng.testcontainers.specs2
-import com.dimafeng.testcontainers.Container
+import com.dimafeng.testcontainers.ContainerDef
 import org.specs2.specification.BeforeAfterAll
 
 trait TestContainerForAll extends BeforeAfterAll { self =>
-  val container: Container
+  val containerDef: ContainerDef
+
+  private var startedContainer: Option[containerDef.Container] = None
 
   override def beforeAll(): Unit = {
-    container.start()
+    val container = containerDef.start()
+    startedContainer = Some(container)
     afterContainerStart()
   }
 
   override def afterAll(): Unit = {
     beforeContainerStop()
-    container.stop()
+    startedContainer.foreach(_.stop())
   }
 
   def afterContainerStart(): Unit = {}
